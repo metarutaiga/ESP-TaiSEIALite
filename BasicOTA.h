@@ -3,9 +3,9 @@
 #include <ArduinoOTA.h>
 
 // https://github.com/esp8266/Arduino/blob/master/libraries/ArduinoOTA/examples/BasicOTA/BasicOTA.ino
-void OTAsetup() {
+void OTAsetup(const char* hostname) {
   ArduinoOTA.setPort(8266);
-  ArduinoOTA.setHostname(WiFi.hostname().c_str());
+  ArduinoOTA.setHostname(hostname);
   ArduinoOTA.onStart([]() {
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH) {
@@ -38,7 +38,4 @@ void OTAsetup() {
     }
   });
   ArduinoOTA.begin();
-  messageSerial.println("Ready");
-  messageSerial.print("IP address: ");
-  messageSerial.println(WiFi.localIP());
 }
