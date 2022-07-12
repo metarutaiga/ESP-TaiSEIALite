@@ -1,7 +1,7 @@
-// ESP-TaiSEIALite 1.01
+// ESP-TaiSEIALite 1.02
 // Copyright 2022 taiga
 
-#define VERSION         "1.01"
+#define VERSION         "1.02"
 
 #define WIFI_SSID       "wifi"
 #define WIFI_PASSWORD   "00000000"
@@ -36,11 +36,11 @@ NTPClient timeClient(ntpUDP, NTP_SERVER, NTP_TIMEZONE * 3600);
 #include "MQTT_ESP8266.h"
 #include "TaiSEIA-Protocol.h"
 
-int ascii_interger(char* payload, unsigned int length, bool hex = false) {
-  char string[20];
-  memcpy(string, payload, length);
-  string[length] = '\0';
-  return hex ? strtol(string, 0, 16) : atoi(string);
+long strntol(const char *str, size_t sz, char **end, int base) {
+  char temp[20];
+  memcpy(temp, str, sz);
+  temp[sz] = '\0';
+  return strtol(temp, end, base);
 }
 
 void MQTTcallback(char* topic, char* payload, unsigned int length) {
@@ -52,9 +52,9 @@ void MQTTcallback(char* topic, char* payload, unsigned int length) {
     forceReset = true;
   } else if (strstr(topic, "/set/Service") != 0) {
     char* service = strstr(topic, "/set/Service") + sizeof("/set/Service") - 1;
-    int device = ascii_interger(service, 2, true);
-    int index = ascii_interger(service + 2, 2, true);
-    int value = ascii_interger(payload, length);
+    int device = strntol(service, 2, 0, 16);
+    int index = strntol(service + 2, 2, 0, 16);
+    int value = strntol(payload, length, 0, 10);
     sendProtocol(0x06, device, index | 0x80, (value >> 8) & 0xff, value & 0xff, 0x00);
   } else {
     result = "unknown";
@@ -82,13 +82,12 @@ void setup() {
   // WIFI
   WiFi.mode(WIFI_STA);
   WiFi.persistent(false);
-  WiFi.disconnect(false);
   WiFi.setAutoReconnect(true);
   WiFi.hostname(hostname);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  WiFi.hostname(hostname);
   WiFi.persistent(false);
   WiFi.setAutoReconnect(true);
+  WiFi.hostname(hostname);
 
   // OTA
   OTAsetup(hostname);
@@ -151,6 +150,6 @@ void loop() {
   ArduinoOTA.handle();
   timeClient.update();
 
-  delay(16);
   ESP.wdtFeed();
+  delay(100);
 }

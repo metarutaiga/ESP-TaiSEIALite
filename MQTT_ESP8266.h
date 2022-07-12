@@ -6,10 +6,6 @@
 WiFiClient espClient;
 PubSubClient MQTTclient(espClient);
 
-#if MQTT_MAX_TRANSFER_SIZE < 512
-#error "Need to define MQTT_MAX_TRANSFER_SIZE 512 in PubSubClient.h"
-#endif
-
 const char* MQTTprefix(const char* prefix, ...) {
   static char path[128];
   char* pointer = path;
@@ -98,6 +94,7 @@ void MQTTreconnect(bool wait) {
       MQTTclient.publish(MQTTprefix("connected", 0), "true", true);
       MQTTclient.publish(MQTTprefix("ESP", "IP", 0), WiFi.localIP().toString().c_str(), true);
       MQTTclient.subscribe(MQTTprefix("set", "#", 0));
+      MQTTclient.setBufferSize(512);
       MQTTinformation();
     }
     else {
