@@ -23,7 +23,7 @@ const char* MQTTprefix(const char* prefix, ...) {
 
 void MQTTinformation() {
   MQTTclient.publish(MQTTprefix("ESP", "Vcc", 0), itoa(ESP.getVcc(), number, 10));
-  MQTTclient.publish(MQTTprefix("ESP", "ChipId", 0), itoa(ESP.getChipId(), number, 10));
+  MQTTclient.publish(MQTTprefix("ESP", "ChipId", 0), itoa(ESP.getChipId(), number, 16));
 
   MQTTclient.publish(MQTTprefix("ESP", "SdkVersion", 0), ESP.getSdkVersion());
   MQTTclient.publish(MQTTprefix("ESP", "CoreVersion", 0), ESP.getCoreVersion().c_str());
@@ -34,8 +34,8 @@ void MQTTinformation() {
 
   MQTTclient.publish(MQTTprefix("ESP", "CpuFreq", 0), itoa(ESP.getCpuFreqMHz(), number, 10));
 
-  MQTTclient.publish(MQTTprefix("ESP", "FlashChipId", 0), itoa(ESP.getFlashChipId(), number, 10));
-  MQTTclient.publish(MQTTprefix("ESP", "FlashChipVendorId", 0), itoa(ESP.getFlashChipVendorId(), number, 10));
+  MQTTclient.publish(MQTTprefix("ESP", "FlashChipId", 0), itoa(ESP.getFlashChipId(), number, 16));
+  MQTTclient.publish(MQTTprefix("ESP", "FlashChipVendorId", 0), itoa(ESP.getFlashChipVendorId(), number, 16));
 
   MQTTclient.publish(MQTTprefix("ESP", "FlashChipRealSize", 0), itoa(ESP.getFlashChipRealSize(), number, 10));
   MQTTclient.publish(MQTTprefix("ESP", "FlashChipSize", 0), itoa(ESP.getFlashChipSize(), number, 10));
@@ -60,13 +60,17 @@ void MQTTupdate() {
     loopHeapMillis = millis() + 1000 * 10;
 
     // Time
-    int hours = timeClient.getHours();
+    static int now_Minutes = -1;
     int minutes = timeClient.getMinutes();
-    sprintf(number, "%02d:%02d", hours, minutes);
-    MQTTclient.publish(MQTTprefix("ESP", "Time", 0), number);
+    if (now_Minutes != minutes) {
+      now_Minutes = minutes;
+      int hours = timeClient.getHours();
+      sprintf(number, "%02d:%02d", hours, minutes);
+      MQTTclient.publish(MQTTprefix("ESP", "Time", 0), number);
+    }
 
     // Heap
-    static int now_FreeHeap = 0;
+    static int now_FreeHeap = -1;
     int freeHeap = ESP.getFreeHeap();
     if (now_FreeHeap != freeHeap) {
       now_FreeHeap = freeHeap;
@@ -74,7 +78,7 @@ void MQTTupdate() {
     }
 
     // RSSI
-    static int now_RSSI = 0;
+    static int now_RSSI = -1;
     int rssi = WiFi.RSSI();
     if (now_RSSI != rssi) {
       now_RSSI = rssi;
@@ -84,12 +88,12 @@ void MQTTupdate() {
 }
 
 // https://github.com/knolleary/pubsubclient/blob/master/examples/mqtt_esp8266/mqtt_esp8266.ino
-void MQTTreconnect(bool wait) {
+void MQTTreconnect(const char* hostname, bool wait) {
   // Loop until we're reconnected
   while (!MQTTclient.connected()) {
     messageSerial.print("Attempting MQTT connection...");
     // Attempt to connect
-    if (MQTTclient.connect(WiFi.hostname().c_str(), MQTTprefix("connected", 0), 0, true, "false")) {
+    if (MQTTclient.connect(hostname, MQTTprefix("connected", 0), 0, true, "false")) {
       messageSerial.println("connected");
       MQTTclient.publish(MQTTprefix("connected", 0), "true", true);
       MQTTclient.publish(MQTTprefix("ESP", "IP", 0), WiFi.localIP().toString().c_str(), true);

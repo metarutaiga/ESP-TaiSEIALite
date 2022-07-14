@@ -1,7 +1,7 @@
-// ESP-TaiSEIALite 1.02
+// ESP-TaiSEIALite 1.03
 // Copyright 2022 taiga
 
-#define VERSION         "1.02"
+#define VERSION         "1.03"
 
 #define WIFI_SSID       "wifi"
 #define WIFI_PASSWORD   "00000000"
@@ -14,6 +14,7 @@
 #define NTP_SERVER      "time.google.com"
 #define NTP_TIMEZONE    0
 
+char hostname[20] = WIFI_HOSTNAME;
 bool forceRestart = false;
 bool forceReset = false;
 char number[128] = {};
@@ -69,7 +70,6 @@ void setup() {
 
   // MAC
   uint8_t mac[WL_MAC_ADDR_LENGTH];
-  char hostname[32] = WIFI_HOSTNAME;
   WiFi.macAddress(mac);
   sprintf(strchr(hostname, '_'), "_%02X%02X%02X", mac[3], mac[4], mac[5]);
 
@@ -95,7 +95,7 @@ void setup() {
   // MQTT
   MQTTclient.setServer(MQTT_SERVER, MQTT_PORT);
   MQTTclient.setCallback((void(*)(char*, byte*, unsigned int))MQTTcallback);
-  MQTTreconnect(false);
+  MQTTreconnect(hostname, false);
 
   // NTP
   timeClient.begin();
@@ -144,7 +144,7 @@ void loop() {
   // Update
   MQTTupdate();
   if (!MQTTclient.connected()) {
-    MQTTreconnect(false);
+    MQTTreconnect(hostname, false);
   }
   MQTTclient.loop();
   ArduinoOTA.handle();
