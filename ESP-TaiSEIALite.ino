@@ -1,7 +1,7 @@
-// ESP-TaiSEIALite 1.05
+// ESP-TaiSEIALite 1.06
 // Copyright 2022 taiga
 
-#define VERSION         "1.05"
+#define VERSION         "1.06"
 
 #define WIFI_SSID       "wifi"
 #define WIFI_PASSWORD   "00000000"
@@ -103,6 +103,7 @@ void setup() {
 
   // Serial
   taiseiaRxSerial.begin(9600, SERIAL_8N1, SERIAL_FULL);
+  taiseiaRxSerial.swap();
   taiseiaTxSerial.begin(9600, SERIAL_8N1, SERIAL_FULL);
 
   // Watchdog
