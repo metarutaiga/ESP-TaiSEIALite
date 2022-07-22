@@ -1,8 +1,8 @@
 #pragma once
 
 void sendProtocol(byte length, ...) {
-  while (taiseiaSerial.available() > 0)
-    taiseiaSerial.read();
+  while (taiseiaRxSerial.available() > 0)
+    taiseiaRxSerial.read();
 
   // Start to send protocol
   byte protocol[256];
@@ -33,6 +33,6 @@ void sendProtocol(byte length, ...) {
 
   // Send
   for (int i = 0; i < length; ++i) {
-    taiseiaSerial.write(protocol[i]);
+    taiseiaTxSerial.write(protocol[i]);
   }
 }

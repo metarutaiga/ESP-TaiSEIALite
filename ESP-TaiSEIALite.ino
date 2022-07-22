@@ -1,7 +1,7 @@
-// ESP-TaiSEIALite 1.04
+// ESP-TaiSEIALite 1.05
 // Copyright 2022 taiga
 
-#define VERSION         "1.04"
+#define VERSION         "1.05"
 
 #define WIFI_SSID       "wifi"
 #define WIFI_PASSWORD   "00000000"
@@ -27,8 +27,9 @@ char state = 0;
 #include <SoftwareSerial.h>
 #include <WiFiUdp.h>
 
-#define messageSerial Serial1
-#define taiseiaSerial Serial
+#define messageSerial Serial
+#define taiseiaRxSerial Serial
+#define taiseiaTxSerial Serial1
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, NTP_SERVER, NTP_TIMEZONE * 3600);
@@ -101,8 +102,8 @@ void setup() {
   timeClient.begin();
 
   // Serial
-  taiseiaSerial.begin(9600, SERIAL_8N1, SERIAL_FULL);
-  taiseiaSerial.swap();
+  taiseiaRxSerial.begin(9600, SERIAL_8N1, SERIAL_FULL);
+  taiseiaTxSerial.begin(9600, SERIAL_8N1, SERIAL_FULL);
 
   // Watchdog
   ESP.wdtEnable(2000);
