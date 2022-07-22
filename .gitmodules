@@ -1,0 +1,3 @@
+[submodule "ESP-Common"]
+	path = ESP-Common
+	url = https://github.com/metarutaiga/ESP-Common

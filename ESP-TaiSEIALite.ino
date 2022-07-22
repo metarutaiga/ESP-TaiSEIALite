@@ -1,7 +1,7 @@
-// ESP-TaiSEIALite 1.03
+// ESP-TaiSEIALite 1.04
 // Copyright 2022 taiga
 
-#define VERSION         "1.03"
+#define VERSION         "1.04"
 
 #define WIFI_SSID       "wifi"
 #define WIFI_PASSWORD   "00000000"
@@ -33,8 +33,8 @@ char state = 0;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, NTP_SERVER, NTP_TIMEZONE * 3600);
 
-#include "BasicOTA.h"
-#include "MQTT_ESP8266.h"
+#include "ESP-Common/BasicOTA.h"
+#include "ESP-Common/MQTT_ESP8266.h"
 #include "TaiSEIA-Protocol.h"
 
 long strntol(const char *str, size_t sz, char **end, int base) {
@@ -102,6 +102,7 @@ void setup() {
 
   // Serial
   taiseiaSerial.begin(9600, SERIAL_8N1, SERIAL_FULL);
+  taiseiaSerial.swap();
 
   // Watchdog
   ESP.wdtEnable(2000);
